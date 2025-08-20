@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
 
 // --- スタイル定義 ---
@@ -13,27 +13,27 @@ const AppContainer = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 2rem;
+  font-size: 3rem;
 `;
 
 const PhaseDisplay = styled.div`
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
   height: 1.8rem;
   color: #e74c3c;
 `;
 
 const TimerContainer = styled.div`
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 500px;
+  height: 500px;
   margin: 0 auto;
 `;
 
 const ProgressRing = styled.svg`
-  width: 200px;
-  height: 200px;
+  width: 500px;
+  height: 500px;
 `;
 
 const ProgressCircle = styled.circle`
@@ -49,21 +49,37 @@ const ProgressCircle = styled.circle`
 `;
 
 const TimerText = styled.div`
-  font-size: 3.5rem;
+  font-size: 7.5rem;
   position: absolute;
-  top: 50%;
+  top: 47.5%;
   left: 50%;
   transform: translate(-50%, -50%);
 `;
 
 const SetsDisplay = styled.div`
-  font-size: 1.2rem;
+  font-size: 3rem;
   margin: 20px 0;
   height: 1.5rem;
 `;
 
 const InputGroup = styled.div`
-  margin-bottom: 20px;
+  margin: 40px 0;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+`;
+
+const StyledInput = styled.input`
+  width: 60px;
+  height: 60px;
+  font-size: 2rem;
+  text-align: center;
+  border: 2px solid #ecf0f1;
+  background-color: transparent;
+  color: #ecf0f1;
+  border-radius: 5px;
 `;
 
 const ButtonGroup = styled.div`
@@ -72,7 +88,30 @@ const ButtonGroup = styled.div`
   gap: 10px;
 `;
 
+const StyledButton = styled.button`
+  font-size: 1.5rem;
+  padding: 10px 20px;
+  border: 2px solid #ecf0f1;
+  border-radius: 5px;
+  background-color: transparent;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+  }
+`;
+
 export default function App() {
+  // 残り秒数を管理するstate
+  const [secondsLeft, setSecondsLeft] = useState(25 * 60);
+
+  // 計算
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+
   return (
     <AppContainer>
       <Title>ポモドーロタイマー</Title>
@@ -96,21 +135,16 @@ export default function App() {
             cy="60"
           />
         </ProgressRing>
-        <TimerText>25:00</TimerText>
+        <TimerText>{`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`}</TimerText>
       </TimerContainer>
       <SetsDisplay>Set: 1 / 4</SetsDisplay>
       <InputGroup>
         <label htmlFor="sets-input">ポモドーロ数：</label>
-        <input
-          type="number"
-          id="sets-input"
-          defaultValue="4"
-          style={{ width: "50px" }}
-        />
+        <StyledInput type="number" id="sets-input" defaultValue="4" />
       </InputGroup>
       <ButtonGroup>
-        <button>スタート</button>
-        <button style={{ display: "none" }}>サウンド停止</button>
+        <StyledButton>スタート</StyledButton>
+        <StyledButton style={{ display: "none" }}>サウンド停止</StyledButton>
       </ButtonGroup>
     </AppContainer>
   );
