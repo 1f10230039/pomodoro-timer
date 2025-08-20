@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "@emotion/styled";
 
 // --- スタイル定義 ---
@@ -21,7 +21,7 @@ const PhaseDisplay = styled.div`
   font-weight: bold;
   margin-bottom: 30px;
   height: 1.8rem;
-  color: #e74c3c;
+  color: ${props => (props.isWorkPhase ? "#e74c3c" : "#2ecc71")};
 `;
 
 const TimerContainer = styled.div`
@@ -34,18 +34,12 @@ const TimerContainer = styled.div`
 const ProgressRing = styled.svg`
   width: 500px;
   height: 500px;
+  transform: rotate(-90deg);
 `;
 
 const ProgressCircle = styled.circle`
-  transition:
-    stroke-dashoffset 0.5s linear,
-    stroke 0.5s linear;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-
-  &.break-time {
-    stroke: #2ecc71;
-  }
+  transition: stroke-dashoffset 0.5s linear;
+  stroke: ${props => (props.isWorkPhase ? "#e74c3c" : "#2ecc71")};
 `;
 
 const TimerText = styled.div`
@@ -104,10 +98,13 @@ const StyledButton = styled.button`
   }
 `;
 
-const WORK_MINUTES = 25;
-const BEWAK_MINUTES = 5;
+const WORK_MINUTES = 1;
+const BREAK_MINUTES = 1;
 
 export default function App() {
+  // サウンドを管理
+  const soundRef = useRef(new Audio("/sound/maou_bgm_acoustic07.mp3"));
+
   // 残り秒数を管理するstate
   const [secondsLeft, setSecondsLeft] = useState(WORK_MINUTES * 60);
 
@@ -118,10 +115,13 @@ export default function App() {
   const [isWorkPhase, setIsWorkPhase] = useState(true);
 
   // 合計セット数を管理するstate
-  const [totalSets, setTotalSets] = useState(2);
+  const [totalSets, setTotalSets] = useState(4);
 
   // 現在のセット数を管理するstate
   const [currentSet, setCurrentSet] = useState(1);
+
+  // サウンドの状態を管理するstate
+  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
 
   // タイマーのロジック
   useEffect(() => {
@@ -133,10 +133,13 @@ export default function App() {
       }, 1000);
       // タイマーが0になったとき
     } else if (isActive && secondsLeft === 0) {
+      // 音楽を鳴らしてボタンを表示
+      soundRef.current.play();
+      setIsSoundPlaying(true);
       // 集中状態が終わったとき
       if (isWorkPhase) {
         setIsWorkPhase(false);
-        setSecondsLeft(BEWAK_MINUTES * 60);
+        setSecondsLeft(BREAK_MINUTES * 60);
       } else {
         // 次のセットはあるか
         if (currentSet < totalSets) {
@@ -154,58 +157,103 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isActive, secondsLeft, isWorkPhase, currentSet, totalSets]);
 
+  // 音楽が最後まで再生されたらボタンを隠すためのuseEffect
+  useEffect(() => {
+    const sound = soundRef.current;
+    const handleSoundEnd = () => setIsSoundPlaying(false);
+    sound.addEventListener("ended", handleSoundEnd);
+    return () => {
+      sound.removeEventListener("ended", handleSoundEnd);
+    };
+  }, []);
+
   // 表示用の計算
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
 
+  // アニメーション用の計算
+  const radius = 52;
+  const circumference = radius * 2 * Math.PI;
+  const totalDuration = (isWorkPhase ? WORK_MINUTES : BREAK_MINUTES) * 60;
+  const progress = (secondsLeft / totalDuration) * 100;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
   // イベントハンドラ
+  // スタートボタンの処理
   const handleStartClick = () => {
     setIsActive(!isActive);
   };
 
+  // リセットボタンの処理
   const handleResetClick = () => {
     setIsActive(false);
-    setIsWorkPhase(false);
+    setIsWorkPhase(true);
     setCurrentSet(1);
     setSecondsLeft(WORK_MINUTES * 60);
+    soundRef.current.pause();
+    soundRef.current.currentTime = 0;
+    setIsSoundPlaying(false);
+  };
+
+  // サウンド停止ボタンの処理
+  const handleStopSoundClick = () => {
+    soundRef.current.pause();
+    soundRef.current.currentTime = 0;
+    setIsSoundPlaying(false);
   };
 
   return (
     <AppContainer>
       <Title>ポモドーロタイマー</Title>
-      <PhaseDisplay>{isWorkPhase ? "Focus Time" : "Break Time"}</PhaseDisplay>
+      <PhaseDisplay isWorkPhase={isWorkPhase}>
+        {isActive || currentSet > totalSets
+          ? isWorkPhase
+            ? "Focus Time"
+            : "Break Time"
+          : ""}
+        {!isActive && currentSet > totalSets && "完了!"}
+      </PhaseDisplay>
       <TimerContainer>
         <ProgressRing viewBox="0 0 120 120">
           <circle
             stroke="#34495e"
             strokeWidth="8"
             fill="transparent"
-            r="52"
+            r={radius}
             cx="60"
             cy="60"
           />
           <ProgressCircle
-            stroke="#e74c3c"
+            isWorkPhase={isWorkPhase}
             strokeWidth="8"
             fill="transparent"
-            r="52"
+            r={radius}
             cx="60"
             cy="60"
-            className={!isWorkPhase ? "break-time" : ""}
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
           />
         </ProgressRing>
-        <TimerText>{`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`}</TimerText>
+        <TimerText>
+          {!isActive && currentSet > totalSets
+            ? "終了!"
+            : `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`}
+        </TimerText>
       </TimerContainer>
       <SetsDisplay>
-        Set: {currentSet} / {totalSets}
+        {isActive || currentSet > totalSets
+          ? `Set: ${currentSet} / ${totalSets}`
+          : ""}
+        {!isActive && currentSet > totalSets && "お疲れ様でした!"}
       </SetsDisplay>
       <InputGroup>
         <label htmlFor="sets-input">ポモドーロ数：</label>
         <StyledInput
           onChange={e => setTotalSets(Number(e.target.value))}
+          disabled={isActive}
           type="number"
           id="sets-input"
-          defaultValue="4"
+          value={totalSets}
         />
       </InputGroup>
       <ButtonGroup>
@@ -213,7 +261,11 @@ export default function App() {
           {isActive ? "一時停止" : "スタート"}
         </StyledButton>
         <StyledButton onClick={handleResetClick}>リセット</StyledButton>
-        <StyledButton style={{ display: "none" }}>サウンド停止</StyledButton>
+        {isSoundPlaying && (
+          <StyledButton onClick={handleStopSoundClick}>
+            サウンド停止
+          </StyledButton>
+        )}
       </ButtonGroup>
     </AppContainer>
   );
