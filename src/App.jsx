@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 
 // --- スタイル定義 ---
 const AppContainer = styled.div`
-  background-color: #2c3e50;
+  background-color: #313131;
   min-height: 100vh;
   display: grid;
   place-content: center;
@@ -21,7 +21,7 @@ const PhaseDisplay = styled.div`
   font-weight: bold;
   margin-bottom: 30px;
   height: 1.8rem;
-  color: ${props => (props.isWorkPhase ? "#e74c3c" : "#2ecc71")};
+  color: ${props => (props.isWorkPhase ? "#2e89ff" : "#2ecc71")};
 `;
 
 const TimerContainer = styled.div`
@@ -39,7 +39,7 @@ const ProgressRing = styled.svg`
 
 const ProgressCircle = styled.circle`
   transition: stroke-dashoffset 0.5s linear;
-  stroke: ${props => (props.isWorkPhase ? "#e74c3c" : "#2ecc71")};
+  stroke: ${props => (props.isWorkPhase ? "#2e89ff" : "#2ecc71")};
 `;
 
 const TimerText = styled.div`
@@ -99,8 +99,8 @@ const StyledButton = styled.button`
   }
 `;
 
-const WORK_MINUTES = 1;
-const BREAK_MINUTES = 1;
+const WORK_MINUTES = 25;
+const BREAK_MINUTES = 5;
 
 export default function App() {
   // サウンドを管理
