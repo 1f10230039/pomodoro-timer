@@ -34,7 +34,7 @@ const TimerContainer = styled.div`
 const ProgressRing = styled.svg`
   width: 500px;
   height: 500px;
-  transform: rotate(-90deg);
+  transform: rotate(-90deg) scaleY(-1);
 `;
 
 const ProgressCircle = styled.circle`
@@ -80,6 +80,7 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: 10px;
+  margin-top: 50px;
 `;
 
 const StyledButton = styled.button`
@@ -148,6 +149,7 @@ export default function App() {
           setSecondsLeft(WORK_MINUTES * 60);
         } else {
           // 全セット終了
+          setCurrentSet(prev => prev + 1);
           setIsActive(false);
         }
       }
@@ -170,6 +172,9 @@ export default function App() {
   // 表示用の計算
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
+
+  // タイマーが全部完了したかを判断する変数
+  const isFinished = !isActive && currentSet > totalSets;
 
   // アニメーション用の計算
   const radius = 52;
@@ -206,12 +211,7 @@ export default function App() {
     <AppContainer>
       <Title>ポモドーロタイマー</Title>
       <PhaseDisplay isWorkPhase={isWorkPhase}>
-        {isActive || currentSet > totalSets
-          ? isWorkPhase
-            ? "Focus Time"
-            : "Break Time"
-          : ""}
-        {!isActive && currentSet > totalSets && "完了!"}
+        {isFinished ? "完了!" : isWorkPhase ? "Focus Time" : "Break Time"}
       </PhaseDisplay>
       <TimerContainer>
         <ProgressRing viewBox="0 0 120 120">
@@ -235,27 +235,26 @@ export default function App() {
           />
         </ProgressRing>
         <TimerText>
-          {!isActive && currentSet > totalSets
-            ? "終了!"
+          {isFinished
+            ? "終了"
             : `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`}
         </TimerText>
       </TimerContainer>
       <SetsDisplay>
-        {isActive || currentSet > totalSets
-          ? `Set: ${currentSet} / ${totalSets}`
-          : ""}
-        {!isActive && currentSet > totalSets && "お疲れ様でした!"}
+        {isFinished ? "お疲れ様でした!" : `Set: ${currentSet} / ${totalSets}`}
       </SetsDisplay>
-      <InputGroup>
-        <label htmlFor="sets-input">ポモドーロ数：</label>
-        <StyledInput
-          onChange={e => setTotalSets(Number(e.target.value))}
-          disabled={isActive}
-          type="number"
-          id="sets-input"
-          value={totalSets}
-        />
-      </InputGroup>
+      {!isActive && (
+        <InputGroup>
+          <label htmlFor="sets-input">ポモドーロ数：</label>
+          <StyledInput
+            onChange={e => setTotalSets(Number(e.target.value))}
+            disabled={isActive}
+            type="number"
+            id="sets-input"
+            value={totalSets}
+          />
+        </InputGroup>
+      )}
       <ButtonGroup>
         <StyledButton onClick={handleStartClick}>
           {isActive ? "一時停止" : "スタート"}
