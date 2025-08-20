@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 
 // --- スタイル定義 ---
@@ -108,9 +108,26 @@ export default function App() {
   // 残り秒数を管理するstate
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
 
+  // タイマーが動いているか止まっているか管理するstate
+  const [isActive, setIsActive] = useState(false);
+
   // 計算
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
+
+  // タイマーのロジック
+  useEffect(() => {
+    let interval = null;
+
+    if (isActive && secondsLeft > 0) {
+      interval = setInterval(() => {
+        setSecondsLeft(seconds => seconds - 1);
+      }, 1000);
+    }
+
+    // クリーンアップ関数
+    return () => clearInterval(interval);
+  }, [isActive, secondsLeft]);
 
   return (
     <AppContainer>
@@ -143,7 +160,9 @@ export default function App() {
         <StyledInput type="number" id="sets-input" defaultValue="4" />
       </InputGroup>
       <ButtonGroup>
-        <StyledButton>スタート</StyledButton>
+        <StyledButton onClick={() => setIsActive(!isActive)}>
+          {isActive ? "一時停止" : "スタート"}
+        </StyledButton>
         <StyledButton style={{ display: "none" }}>サウンド停止</StyledButton>
       </ButtonGroup>
     </AppContainer>
