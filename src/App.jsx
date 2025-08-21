@@ -116,7 +116,7 @@ export default function App() {
   const [isWorkPhase, setIsWorkPhase] = useState(true);
 
   // 合計セット数を管理するstate
-  const [totalSets, setTotalSets] = useState(4);
+  const [totalSets, setTotalSets] = useState(3);
 
   // 現在のセット数を管理するstate
   const [currentSet, setCurrentSet] = useState(1);
