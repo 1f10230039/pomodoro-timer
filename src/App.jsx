@@ -107,7 +107,7 @@ const BREAK_MINUTES = 5;
 
 export default function App() {
   // サウンドを管理
-  const soundRef = useRef(new Audio("../public/sound/maou_bgm_acoustic07.mp3"));
+  const soundRef = useRef(new Audio("sound/maou_bgm_acoustic07.mp3"));
 
   // 残り秒数を管理するstate
   const [secondsLeft, setSecondsLeft] = useState(WORK_MINUTES * 60);
