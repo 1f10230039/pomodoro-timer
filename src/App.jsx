@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "@emotion/styled";
 
-// --- スタイル定義 ---
+// スタイル定義
 const AppContainer = styled.div`
   background-color: #313131;
   min-height: 100vh;
@@ -99,7 +99,10 @@ const StyledButton = styled.button`
   }
 `;
 
+// 集中する時間を設定
 const WORK_MINUTES = 25;
+
+// 休憩時間を設定
 const BREAK_MINUTES = 5;
 
 export default function App() {
@@ -191,11 +194,16 @@ export default function App() {
       soundRef.current.play().catch(() => {});
       soundRef.current.pause();
     }
+    // 音楽ファイルをリロードして、ブラウザにこれから使うと再認識させる
+    soundRef.current.load();
     setIsActive(!isActive);
   };
 
   // リセットボタンの処理
   const handleResetClick = () => {
+    // リセット時にも、サウンドの状態をきれいにしておく
+    soundRef.current.load();
+
     setIsActive(false);
     setIsWorkPhase(true);
     setCurrentSet(1);
