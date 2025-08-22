@@ -186,6 +186,11 @@ export default function App() {
   // イベントハンドラ
   // スタートボタンの処理
   const handleStartClick = () => {
+    // ユーザーの最初のクリックで、ブラウザの再生許可をもらうための儀式
+    if (soundRef.current.paused) {
+      soundRef.current.play().catch(() => {});
+      soundRef.current.pause();
+    }
     setIsActive(!isActive);
   };
 
