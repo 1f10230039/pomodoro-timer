@@ -258,7 +258,7 @@ export default function App() {
       </SetsDisplay>
       {!isActive && (
         <InputGroup>
-          <label htmlFor="sets-input">ポモドーロ数：</label>
+          <label htmlFor="sets-input">セット数：</label>
           <StyledInput
             onChange={e => setTotalSets(Number(e.target.value))}
             disabled={isActive}
